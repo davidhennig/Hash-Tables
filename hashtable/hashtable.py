@@ -9,6 +9,50 @@ class HashTableEntry:
         self.next = None
 
 
+class LinkedList:
+    def __init__(self, node=None):
+        self.head = node
+        self.tail = node
+
+    def add_to_tail(self, key, value):
+        entry = HashTableEntry(key, value)
+        if self.head == None:
+            self.head = entry
+            return
+        cur = self.head
+        while cur.next is not None:
+            if cur.key == key:
+                cur.value = value
+            cur = cur.next
+
+        cur.next = entry
+
+    def find(self, key):
+        cur = self.head
+        while cur is not None:
+            if cur.key == key:
+                return cur.value
+            cur = cur.next
+        return None
+    
+    def delete(self, key):
+        cur = self.head
+        if cur.key == key:
+            self.head = self.head.next
+            cur.next = None
+            return cur
+        prev = None
+        while cur is not None:
+            if cur.key == key:
+                prev.next = cur.next
+                cur.next = None
+                return cur
+            prev = cur
+            cur = cur.next
+        return None
+
+
+
 
 class HashTable:
     """
@@ -19,7 +63,7 @@ class HashTable:
     """
     def __init__(self, capacity):
         self.capacity = capacity
-        self.hash_table = [None] * self.capacity
+        self.hash_table = [LinkedList()] * self.capacity
 
     def fnv1(self, key):
         """
@@ -57,7 +101,7 @@ class HashTable:
         """
 
         index = self.hash_index(key)
-        self.hash_table[index] = value
+        self.hash_table[index].add_to_tail(key, value)
 
     def delete(self, key):
         """
@@ -69,7 +113,7 @@ class HashTable:
         """
 
         index = self.hash_index(key)
-        self.hash_table[index] = None
+        self.hash_table[index].delete(key)
 
     def get(self, key):
         """
@@ -80,7 +124,7 @@ class HashTable:
         Implement this.
         """
         index = self.hash_index(key)
-        return self.hash_table[index]
+        return self.hash_table[index].find(key)
 
     def resize(self):
         """
