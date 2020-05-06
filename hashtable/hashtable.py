@@ -62,8 +62,12 @@ class HashTable:
     Implement this.
     """
     def __init__(self, capacity):
+        self.num_elements = 0
         self.capacity = capacity
-        self.hash_table = [LinkedList()] * self.capacity
+        self.storage = [LinkedList()] * self.capacity
+        self.added_in = set()
+
+
 
     def fnv1(self, key):
         """
@@ -101,7 +105,14 @@ class HashTable:
         """
 
         index = self.hash_index(key)
-        self.hash_table[index].add_to_tail(key, value)
+        self.storage[index].add_to_tail(key, value)
+        if key not in self.added_in:
+            self.added_in.add(key)
+            #self.num_elements += 1
+
+        load_factor = (len(self.added_in)/ self.capacity)
+        if load_factor > 0.7:
+            self.resize(self.capacity * 2)
 
     def delete(self, key):
         """
@@ -113,7 +124,9 @@ class HashTable:
         """
 
         index = self.hash_index(key)
-        self.hash_table[index].delete(key)
+        self.storage[index].delete(key)
+        self.added_in.remove(key)
+        #self.num_elements -= 1
 
     def get(self, key):
         """
@@ -124,15 +137,29 @@ class HashTable:
         Implement this.
         """
         index = self.hash_index(key)
-        return self.hash_table[index].find(key)
+        return self.storage[index].find(key)
 
-    def resize(self):
+    def resize(self, new_capacity):
         """
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
 
         Implement this.
         """
+
+        new_hashtable = [LinkedList()] * new_capacity
+        self.capacity = new_capacity
+
+        for i in self.storage:
+            head = i.head
+            cur = head
+            while cur is not None:
+                index = self.hash_index(cur.key)
+                new_hashtable[index].add_to_tail(cur.key, cur.value)
+                cur = cur.next
+
+        self.storage = new_hashtable
+
 
 if __name__ == "__main__":
     ht = HashTable(2)
